@@ -1,0 +1,109 @@
+:host {
+	--range-track-color: var(--brd-color, #aaa);
+	--range-thumb-color: var(--text-color, #fff);
+
+	--range-thumb-height: 12px;
+	--range-thumb-width: 12px;
+
+	--range-track-width: 100%;
+	--range-track-height: 6px;
+
+	& > div {
+		display: flex;
+		align-items: center;
+		height: calc(var(--range-track-height) + var(--indent-md, 5px) * 2);
+
+		& > span {
+			flex-basis: 30px;
+			padding-left: var(--indent-sm, 3px);
+			text-align: left;
+			user-select: none;
+		}
+	}
+}
+
+@mixin track {
+	width: var(--range-track-width);
+	height: var(--range-track-height);
+	border-radius: 3px;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+@mixin thumb {
+	border: none;
+	height: var(--range-thumb-height);
+	width: var(--range-thumb-width);
+	background: var(--range-thumb-color);
+	cursor: pointer;
+	border-radius: 50%;
+}
+
+input {
+	flex: 1;
+	background-color: transparent;
+	-webkit-appearance: none;
+	margin: calc(var(--range-thumb-height) / 2 - var(--range-track-height) / 2) 0;
+	position: relative;
+
+	&:focus {
+		outline: none;
+	}
+
+	&::-webkit-slider-runnable-track {
+		@include track;
+		background: var(--range-track-color);
+		border: none;
+	}
+
+	&::-webkit-slider-thumb {
+		@include thumb;
+		-webkit-appearance: none;
+		margin-top: calc((var(--range-track-height) / 2) - (var(--range-thumb-height) / 2));
+	}
+
+	&:focus::-webkit-slider-runnable-track {
+		background: var(--range-track-color);
+		border: none;
+	}
+
+	&::-moz-range-track {
+		@include track;
+		background: var(--range-track-color);
+		border: none;
+	}
+
+	&::-moz-range-thumb {
+		@include thumb;
+	}
+
+	&::-ms-track {
+		@include track;
+		background: transparent;
+		border-color: transparent;
+		border-width: var(--range-thumb-width) 0;
+		color: transparent;
+	}
+
+	&::-ms-fill-lower {
+		background: var(--range-track-color);
+		border: none;
+	}
+
+	&::-ms-fill-upper {
+		background: var(--range-track-color);
+		border: none;
+	}
+
+	&::-ms-thumb {
+		@include thumb;
+	}
+
+	&:focus::-ms-fill-lower {
+		background: var(--range-track-color);
+	}
+
+	&:focus::-ms-fill-upper {
+		background: var(--range-track-color);
+	}
+}

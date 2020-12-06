@@ -1,0 +1,25 @@
+:host > div {
+	display: flex;
+	flex-wrap: wrap;
+	margin-bottom: var(--indent-md);
+
+	& > div {
+		width: 16px;
+		height: 16px;
+		box-sizing: border-box;
+		background-color: var(--color, #fff);
+		margin-right: var(--indent-sm, 5px);
+		margin-bottom: var(--indent-sm, 5px);
+		border: 1px solid var(--bg-color, #333);
+		cursor: pointer;
+
+		&:hover {
+			outline: 1px solid var(--brd-color, #aaa);
+		}
+
+		&.selected,
+		&.selected:hover {
+			outline: 1px solid var(--text-color, #fff);
+		}
+	}
+}

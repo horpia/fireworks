@@ -1,0 +1,34 @@
+{
+  "name": "ts-canvas-filter",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "webpack serve",
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/horpia/fireworks.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/horpia/fireworks/issues"
+  },
+  "homepage": "https://github.com/horpia/fireworks#readme",
+  "devDependencies": {
+    "copy-webpack-plugin": "^6.3.2",
+    "handlebars": "^4.7.6",
+    "handlebars-loader": "^1.7.1",
+    "sass": "^1.29.0",
+    "sass-loader": "^10.1.0",
+    "sass-to-string": "^1.1.0",
+    "ts-loader": "^8.0.11",
+    "typescript": "^4.0.5",
+    "webpack": "^5.4.0",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

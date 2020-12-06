@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "./build/",
+    "noImplicitAny": true,
+    "target": "ES2018",
+    "module": "es2020",
+    "allowJs": true
+  }
+}

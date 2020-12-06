@@ -1,0 +1,29 @@
+:host {
+	--indent-md: 6px;
+	--indent-sm: 4px;
+	--font-size: 12px;
+	--text-color: #fff;
+	--brd-color: #888;
+	--bg-color: #333;
+
+	position: fixed;
+	left: 20px;
+	top: 20px;
+	z-index: var(--z-index, 100001);
+	background-color: rgba(0, 0, 0, 0.6);
+	color: var(--text-color);
+	border: 1px solid var(--brd-color);
+	font-size: var(--font-size);
+	font-family: Tahoma, Helvetica, Arial, sans-serif;
+	width: 200px;
+}
+
+summary {
+	height: 20px;
+	line-height: 20px;
+	outline: none;
+	cursor: pointer;
+	user-select: none;
+	background-color: var(--bg-color);
+	padding: var(--indent-sm) var(--indent-md);
+}

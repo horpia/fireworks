@@ -1,0 +1,10 @@
+:host([fullscreen]) {
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: var(--z-index, 100000);
+}
+
+canvas {
+	background-color: rgba(0, 0, 0, 0.7);
+}
