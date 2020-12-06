@@ -5,11 +5,13 @@ import {FireworksExplosionType0} from "./type0/fireworks-explosion-type0";
 import {FireworksExplosionType1Circle} from "./type1-circle/fireworks-explosion-type1-circle";
 import {AbstractFireworksExplosionTypeForm} from "./abstract-fireworks-explosion-type-form";
 import {EVENT_RENDER_ELEMENT} from "../fireworks-dev-tool";
+import {FireworksExplosionType1Disk} from "./type1-disk/fireworks-explosion-type1-disk";
 import {FireworksExplosionType1Sphere} from "./type1-sphere/fireworks-explosion-type1-sphere";
 
 window.customElements.define('fw-exp-type0', FireworksExplosionType0);
 window.customElements.define('fw-exp-type1-circle', FireworksExplosionType1Circle);
 window.customElements.define('fw-exp-type1-sphere', FireworksExplosionType1Sphere);
+window.customElements.define('fw-exp-type1-disk', FireworksExplosionType1Disk);
 
 export class FireworksExplosionsForm extends AbstractFireworksDevElement {
 	private readonly form: HTMLFormElement;

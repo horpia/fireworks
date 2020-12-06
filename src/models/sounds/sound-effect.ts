@@ -14,6 +14,7 @@ export class SoundEffect {
 		}
 
 		const audio:HTMLAudioElement = cache.get(this.filePath).cloneNode(true) as HTMLAudioElement;
+		audio.volume = 0.5;
 		await audio.play();
 
 		return true;

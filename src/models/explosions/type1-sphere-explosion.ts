@@ -1,7 +1,6 @@
 import {limitRange, Point} from "../utils/math";
 import {PointsTail} from "../tail/PointsTail";
 import {AbstractExplosionType1, AbstractExplosionType1Element} from "./abstract-explosion-type1";
-import {SoundEffect} from "../sounds/sound-effect";
 
 const ANGLE_DEVIATION_FACTOR: number = 0.02;
 const DISTANCE_DEVIATION_FACTOR: number = 0.05;
