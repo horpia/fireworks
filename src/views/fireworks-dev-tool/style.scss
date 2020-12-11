@@ -15,7 +15,7 @@
 	border: 1px solid var(--brd-color);
 	font-size: var(--font-size);
 	font-family: Tahoma, Helvetica, Arial, sans-serif;
-	width: 200px;
+	width: 250px;
 }
 
 summary {
@@ -26,4 +26,23 @@ summary {
 	user-select: none;
 	background-color: var(--bg-color);
 	padding: var(--indent-sm) var(--indent-md);
+}
+
+.output-json {
+	white-space: pre-wrap;
+	color: var(--text-color);
+	margin: var(--indent-md);
+	font-family: "Courier New", monospace;
+
+	&:empty {
+		&:before {
+			content: 'nothing to show...';
+			font-style: italic;
+		}
+	}
+}
+
+.random-fireworks {
+	color: var(--text-color);
+	margin: var(--indent-md);
 }

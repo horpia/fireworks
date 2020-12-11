@@ -1,6 +1,7 @@
-import {DEG_TO_RAD, limitRange, PI_2, Point} from "../utils/math";
+import {DEG_TO_RAD, interpolateLinear, PI_2} from "../utils/math";
 import {PointsTail} from "../tail/PointsTail";
 import {AbstractExplosionType1, AbstractExplosionType1Element} from "./abstract-explosion-type1";
+import {FireworkType} from "../fireworks-builder";
 
 const ANGLE_DEVIATION_FACTOR: number = 0.1;
 const TAIL_LENGTH: number = 6;
@@ -15,25 +16,20 @@ export enum Type1DiskExplosionLimits {
 }
 
 export class Type1DiskExplosion extends AbstractExplosionType1 {
-	constructor(
-		colors: string[],
-		pos: Point,
-		distance: number = Type1DiskExplosionLimits.MIN_DISTANCE,
-		elementsCount: number = Type1DiskExplosionLimits.MIN_ELEMENTS
-	) {
-		distance = limitRange(
-			distance,
-			Type1DiskExplosionLimits.MAX_DISTANCE,
-			Type1DiskExplosionLimits.MIN_DISTANCE
+	constructor(firework: FireworkType) {
+		const distance: number = interpolateLinear(
+			firework.sizeFactor ?? 0.5,
+			Type1DiskExplosionLimits.MIN_DISTANCE,
+			Type1DiskExplosionLimits.MAX_DISTANCE
 		);
 
-		elementsCount = limitRange(
-			elementsCount,
-			Type1DiskExplosionLimits.MAX_ELEMENTS,
-			Type1DiskExplosionLimits.MIN_ELEMENTS
+		const elementsCount: number = interpolateLinear(
+			firework.elementsFactor ?? 0.5,
+			Type1DiskExplosionLimits.MIN_ELEMENTS,
+			Type1DiskExplosionLimits.MAX_ELEMENTS
 		);
 
-		super(colors, pos, distance, elementsCount);
+		super(firework, distance, elementsCount);
 
 		this.duration = DURATION;
 	}

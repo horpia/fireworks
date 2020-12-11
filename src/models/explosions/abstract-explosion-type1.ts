@@ -1,9 +1,11 @@
 import {RenderElementInterface} from "../render/render-element-interface";
 import {easeOutExpo} from "../utils/easing";
-import {PI_2, Point} from "../utils/math";
+import {PI_2, Point, Rectangle} from "../utils/math";
 import {PointsTail} from "../tail/PointsTail";
 import {Type0Explosion} from "./type0-explosion";
-import {SoundEffect} from "../sounds/sound-effect";
+import {SoundEffect, SoundEffectsList} from "../sounds/sound-effect";
+import {FireworkType} from "../fireworks-builder";
+import {DEFAULT_COLOR} from "../colors";
 
 export type AbstractExplosionType1Element = Point & {
 	distance: number,
@@ -19,36 +21,49 @@ const GLOW_RADIUS: number = 6;
 const FINAL_FADE_DURATION: number = 10;
 
 export abstract class AbstractExplosionType1 implements RenderElementInterface {
+	public sound: SoundEffect | null = null;
+
 	protected time: number = 0;
 	protected value: number = 0;
 	protected duration: number = 0;
 	protected opacity: number = 1;
 	protected readonly elements: AbstractExplosionType1Element[] = [];
 	protected explosionType0: Type0Explosion | null;
+	protected readonly colors: string[];
+	protected readonly pos: Point;
 
 	protected constructor(
-		protected colors: string[],
-		protected pos: Point,
+		firework: FireworkType,
 		protected readonly distance: number,
 		elementsCount: number
 	) {
+		this.colors = firework.colors || [DEFAULT_COLOR];
+		this.pos = firework.position || {x: 0, y: 0};
 		this.elements = this.generateElements(elementsCount);
-		this.explosionType0 = new Type0Explosion(
-			this.colors[0],
-			this.pos,
-			50,
-			elementsCount
-		);
+		this.explosionType0 = new Type0Explosion({
+			colors: [this.colors[0]],
+			position: this.pos,
+			sizeFactor: firework.sizeFactor ?? 0.5,
+			elementsFactor: firework.elementsFactor ?? 0.5
+		});
+		this.explosionType0.sound = null;
+		this.sound = new SoundEffect(SoundEffectsList.EXPLOSION_2);
 	}
 
 	protected abstract generateElements(elementsCount: number): AbstractExplosionType1Element[];
 
-	getSoundEffect(): SoundEffect {
-		return new SoundEffect('./sounds/explosion-type1.mp3');
-	}
-
 	protected getRandomColor(): string {
 		return this.colors[Math.ceil(Math.random() * 1000) % this.colors.length];
+	}
+
+	getBoundingRect(): Rectangle {
+		const halfDistance: number = this.distance >> 1;
+		return {
+			x: this.pos.x - halfDistance,
+			y: this.pos.y - halfDistance,
+			width: this.distance,
+			height: this.distance,
+		};
 	}
 
 	get isEnded(): boolean {
@@ -65,7 +80,11 @@ export abstract class AbstractExplosionType1 implements RenderElementInterface {
 		return this.explosionType0?.isEnded !== false;
 	}
 
-	interrupt(): void {
+	interrupt(): boolean {
+		if (this.sound?.play() === false) {
+			return false;
+		}
+		
 		for (const el of this.elements) {
 			el.tail?.interrupt();
 		}
@@ -79,7 +98,7 @@ export abstract class AbstractExplosionType1 implements RenderElementInterface {
 		}
 
 		if (this.time >= this.duration) {
-			return;
+			return true;
 		}
 
 		this.value = easeOutExpo(Math.min(1, this.time / this.duration));
@@ -96,6 +115,8 @@ export abstract class AbstractExplosionType1 implements RenderElementInterface {
 		}
 
 		++this.time;
+
+		return true;
 	}
 
 	render(ctx: CanvasRenderingContext2D) {

@@ -1,0 +1,16 @@
+<form action="#">
+	<select name="type">
+		<option value="type0">Type 0</option>
+		<option value="type1" selected>Type 1</option>
+	</select>
+	<fw-rocket-type0 hidden data-type="type0" for="{{for}}"></fw-rocket-type0>
+	<fw-rocket-type1 hidden data-type="type1" for="{{for}}"></fw-rocket-type1>
+
+	<label>Angle Factor:</label>
+	<fw-input-range name="angle" min="0" max="1" value="0.5" step="0.05"></fw-input-range>
+
+	<label>Size Factor:</label>
+	<fw-input-range name="distance" min="0" max="1" value="0.5" step="0.05"></fw-input-range>
+
+	<button type="submit">Show</button>
+</form>

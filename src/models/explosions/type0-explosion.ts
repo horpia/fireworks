@@ -1,6 +1,8 @@
 import {RenderElementInterface} from "../render/render-element-interface";
-import {DEG_TO_RAD, limitRange, Point} from "../utils/math";
-import {SoundEffect} from "../sounds/sound-effect";
+import {DEG_TO_RAD, interpolateLinear, limitRange, Point, Rectangle} from "../utils/math";
+import {SoundEffect, SoundEffectsList} from "../sounds/sound-effect";
+import {FireworkType} from "../fireworks-builder";
+import {DEFAULT_COLOR} from "../colors";
 
 const ANGLE_DEVIATION: number = 0.3;
 const DEVIATION: number = 0.4;
@@ -14,6 +16,8 @@ export enum Type0ExplosionLimits {
 }
 
 export class Type0Explosion implements RenderElementInterface {
+	public sound: SoundEffect | null = null;
+
 	private stage: number = 0;
 	private opacity: number = 1;
 	private readonly angleStepDeg: number = 0;
@@ -21,28 +25,48 @@ export class Type0Explosion implements RenderElementInterface {
 	private pathGlow?: Point[];
 	private glowRadius1: number = 5;
 	private glowRadius2: number = 10;
+	private readonly distance: number;
+	private readonly color: string;
+	private readonly pos: Point;
 
-	constructor(
-		private color: string,
-		private pos: Point,
-		private readonly distance: number = Type0ExplosionLimits.MIN_DISTANCE,
-		peaks: number = Type0ExplosionLimits.MIN_PEAKS,
-	) {
-		this.distance = limitRange(this.distance, Type0ExplosionLimits.MAX_DISTANCE, Type0ExplosionLimits.MIN_DISTANCE);
-		this.angleStepDeg = 360 / (
-			limitRange(peaks, Type0ExplosionLimits.MAX_PEAKS, Type0ExplosionLimits.MIN_PEAKS) * 2
+	constructor(firework: FireworkType) {
+		this.pos = firework.position || {x: 0, y: 0};
+		this.color = firework?.colors[0] || DEFAULT_COLOR;
+		this.distance = interpolateLinear(
+			firework.sizeFactor ?? 0.5,
+			Type0ExplosionLimits.MIN_DISTANCE,
+			Type0ExplosionLimits.MAX_DISTANCE
 		);
+
+		this.angleStepDeg = 360 / (
+			interpolateLinear(
+				firework.elementsFactor ?? 0.5,
+				Type0ExplosionLimits.MIN_PEAKS,
+				Type0ExplosionLimits.MAX_PEAKS
+			) * 2
+		);
+		this.sound = new SoundEffect(SoundEffectsList.EXPLOSION_1);
+	}
+
+	getBoundingRect(): Rectangle {
+		const halfDistance: number = this.distance >> 1;
+		return {
+			x: this.pos.x - halfDistance,
+			y: this.pos.y - halfDistance,
+			width: this.distance,
+			height: this.distance,
+		};
 	}
 
 	get isEnded(): boolean {
 		return this.stage >= MAX_STAGES;
 	}
 
-	getSoundEffect(): SoundEffect {
-		return new SoundEffect('./sounds/explosion-type0.mp3');
-	}
+	interrupt(): boolean {
+		if (this.sound?.play() === false) {
+			return false;
+		}
 
-	interrupt(): void {
 		switch (this.stage) {
 			case 0:
 				this.pathGlow = this.generatePath(1, Math.random() * 180);
@@ -65,6 +89,8 @@ export class Type0Explosion implements RenderElementInterface {
 				break;
 		}
 		++this.stage;
+
+		return true;
 	}
 
 	render(ctx: CanvasRenderingContext2D) {

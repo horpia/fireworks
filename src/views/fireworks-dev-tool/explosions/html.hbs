@@ -2,12 +2,33 @@
 	<select name="type">
 		<option value="type0">Type 0</option>
 		<option value="type1-circle">Type 1 - Circle</option>
-		<option value="type1-sphere" selected>Type 1 - Sphere</option>
+		<option value="type1-sphere">Type 1 - Sphere</option>
 		<option value="type1-disk">Type 1 - Disk</option>
+		<option value="type2">Type 2</option>
+		<option value="comb1">Comb 1 (Circle + Sparks)</option>
+		<option value="comb2">Comb 2 (Circle + Claps)</option>
+		<option value="comb3">Comb 3 (Circle + Disk)</option>
+		<option value="comb4">Comb 4 (3 Spheres)</option>
+		<option value="comb5">Comb 5 (Sphere + Sparks)</option>
+		<option value="comb6" selected>Comb 6 (3 Disks)</option>
 	</select>
 	<fw-exp-type0 hidden data-type="type0" for="{{for}}"></fw-exp-type0>
 	<fw-exp-type1-circle hidden data-type="type1-circle" for="{{for}}"></fw-exp-type1-circle>
 	<fw-exp-type1-sphere hidden data-type="type1-sphere" for="{{for}}"></fw-exp-type1-sphere>
 	<fw-exp-type1-disk hidden data-type="type1-disk" for="{{for}}"></fw-exp-type1-disk>
+	<fw-exp-type2 hidden data-type="type2" for="{{for}}"></fw-exp-type2>
+	<fw-exp-comb hidden type="comb1" data-type="comb1" for="{{for}}"></fw-exp-comb>
+	<fw-exp-comb hidden type="comb2" data-type="comb2" for="{{for}}"></fw-exp-comb>
+	<fw-exp-comb hidden type="comb3" data-type="comb3" for="{{for}}"></fw-exp-comb>
+	<fw-exp-comb hidden type="comb4" data-type="comb4" for="{{for}}"></fw-exp-comb>
+	<fw-exp-comb hidden type="comb5" data-type="comb5" for="{{for}}"></fw-exp-comb>
+	<fw-exp-comb hidden type="comb6" data-type="comb6" for="{{for}}"></fw-exp-comb>
+
+	<label>Size Factor:</label>
+	<fw-input-range name="distance" min="0" max="1" value="0.5" step="0.05"></fw-input-range>
+
+	<label>Elements Factor:</label>
+	<fw-input-range name="elements" min="0" max="1" value="0.5" step="0.05"></fw-input-range>
+	
 	<button type="submit">Show</button>
 </form>

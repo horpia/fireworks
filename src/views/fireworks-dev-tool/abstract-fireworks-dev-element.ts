@@ -27,17 +27,6 @@ export abstract class AbstractFireworksDevElement extends AbstractCustomElement 
 		return this.canvas;
 	}
 
-	protected get centerPoint(): Point {
-		if (!this.targetCanvas) {
-			return {x: 0, y: 0};
-		}
-		const canvas: HTMLCanvasElement = this.targetCanvas.canvas;
-		return {
-			x: canvas.width >> 1,
-			y: canvas.height >> 1
-		};
-	}
-
 	protected handleForChange(): void {
 		this.canvas = null;
 	}

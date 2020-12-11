@@ -1,7 +1,7 @@
 import {AbstractCustomElement} from "../../abstract-custom-element";
 import style from './style.scss';
 import template from './html.hbs';
-import {COLORS} from "../../../models/colors";
+import {COLORS, COLORS_ROCKETS} from "../../../models/colors";
 
 export class FireworksColorPicker extends AbstractCustomElement {
 	private readonly input: HTMLInputElement;
@@ -10,7 +10,7 @@ export class FireworksColorPicker extends AbstractCustomElement {
 		super();
 
 		this.createShadowDom(style, template({
-			colors: COLORS
+			colors: this.colorPalette
 		}));
 
 		this.shadowRoot.querySelectorAll<HTMLDivElement>('div[data-color]').forEach(el => {
@@ -28,19 +28,23 @@ export class FireworksColorPicker extends AbstractCustomElement {
 		return ['name', 'value', 'autofill'];
 	}
 
+	get colorPalette(): string[] {
+		return this.getAttribute('palette') === 'rockets' ? COLORS_ROCKETS : COLORS;
+	}
+
 	protected handleNameChange(): void {
 		this.input.name = this.getAttribute('name') || '';
 	}
 
 	protected handleAutofillChange(): void {
 		if (this.hasAttribute('autofill') && this.input.value === '') {
-			this.setAttribute('value', COLORS[0]);
+			this.setAttribute('value', this.colorPalette[0]);
 		}
 	}
 
 	protected handleValueChange(): void {
 		const color: string = this.getAttribute('value') || '';
-		if (color !== '' && !COLORS.includes(color)) {
+		if (color !== '' && !this.colorPalette.includes(color)) {
 			return;
 		}
 

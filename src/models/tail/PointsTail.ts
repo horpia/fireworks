@@ -1,4 +1,4 @@
-import {Point} from "../utils/math";
+import {Point, Rectangle} from "../utils/math";
 import {RenderElementInterface} from "../render/render-element-interface";
 import {SoundEffect} from "../sounds/sound-effect";
 
@@ -21,10 +21,6 @@ export class PointsTail implements RenderElementInterface {
 		this.points = [];
 		this.halfSize = pointSize / 2;
 		this.opacityStep = 1 / length;
-	}
-
-	getSoundEffect(): SoundEffect | null {
-		return null;
 	}
 
 	addPoint(point: Point): PointsTail {
@@ -64,9 +60,27 @@ export class PointsTail implements RenderElementInterface {
 		return this;
 	}
 
+	getBoundingRect(): Rectangle {
+		const min: Point = {x: Number.MAX_VALUE, y: Number.MAX_VALUE};
+		const max: Point = {x: 0, y: 0};
+		for (const p of this.points) {
+			min.x = Math.min(min.x, p.x);
+			min.y = Math.min(min.y, p.y);
+			max.x = Math.max(max.x, p.x);
+			max.y = Math.max(max.y, p.y);
+		}
+
+		return {
+			x: min.x,
+			y: min.y,
+			width: max.x - min.x,
+			height: max.y - min.y,
+		};
+	}
+
 	get isEnded(): boolean {
 		for (const pt of this.points) {
-			if (pt.opacity > 0) {
+			if (pt.opacity > OPACITY_EPSILON) {
 				return false;
 			}
 		}
@@ -74,7 +88,7 @@ export class PointsTail implements RenderElementInterface {
 		return true;
 	}
 
-	interrupt(): void {
+	interrupt(): boolean {
 		if (this.points.length > MAX_POINTS_IN_LIST) {
 			this.points.splice(MAX_POINTS_IN_LIST - 100);
 		}
@@ -85,6 +99,8 @@ export class PointsTail implements RenderElementInterface {
 			}
 			pt.opacity /= 2;
 		}
+
+		return true;
 	}
 
 	render(ctx: CanvasRenderingContext2D) {

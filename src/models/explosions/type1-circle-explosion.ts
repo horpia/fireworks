@@ -1,12 +1,13 @@
-import {DEG_TO_RAD, limitRange, Point} from "../utils/math";
+import {DEG_TO_RAD, interpolateLinear} from "../utils/math";
 import {PointsTail} from "../tail/PointsTail";
 import {AbstractExplosionType1, AbstractExplosionType1Element} from "./abstract-explosion-type1";
+import {FireworkType} from "../fireworks-builder";
 
 const ANGLE_DEVIATION_FACTOR: number = 0.4;
 const DISTANCE_DEVIATION_FACTOR: number = 0.5;
 const TAIL_LENGTH: number = 30;
 const POINT_SIZE: number = 2;
-const DURATION: number = 15;
+export const TYPE1_CIRCLE_DURATION: number = 15;
 
 export enum Type1CircleExplosionLimits {
 	MIN_ELEMENTS = 10,
@@ -16,27 +17,22 @@ export enum Type1CircleExplosionLimits {
 }
 
 export class Type1CircleExplosion extends AbstractExplosionType1 {
-	constructor(
-		colors: string[],
-		pos: Point,
-		distance: number = Type1CircleExplosionLimits.MIN_DISTANCE,
-		elementsCount: number = Type1CircleExplosionLimits.MIN_ELEMENTS
-	) {
-		distance = limitRange(
-			distance,
-			Type1CircleExplosionLimits.MAX_DISTANCE,
-			Type1CircleExplosionLimits.MIN_DISTANCE
+	constructor(firework: FireworkType) {
+		const distance: number = interpolateLinear(
+			firework.sizeFactor ?? 0.5,
+			Type1CircleExplosionLimits.MIN_DISTANCE,
+			Type1CircleExplosionLimits.MAX_DISTANCE
 		);
 
-		elementsCount = limitRange(
-			elementsCount,
-			Type1CircleExplosionLimits.MAX_ELEMENTS,
-			Type1CircleExplosionLimits.MIN_ELEMENTS
+		const elementsCount: number = interpolateLinear(
+			firework.elementsFactor ?? 0.5,
+			Type1CircleExplosionLimits.MIN_ELEMENTS,
+			Type1CircleExplosionLimits.MAX_ELEMENTS
 		);
 
-		super(colors, pos, distance, elementsCount);
+		super(firework, distance, elementsCount);
 
-		this.duration = DURATION;
+		this.duration = TYPE1_CIRCLE_DURATION;
 	}
 
 	protected generateElements(elementsCount: number): AbstractExplosionType1Element[] {

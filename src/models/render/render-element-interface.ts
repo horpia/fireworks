@@ -1,8 +1,8 @@
-import {SoundEffect} from "../sounds/sound-effect";
+import {Rectangle} from "../utils/math";
 
 export interface RenderElementInterface {
 	isEnded: boolean;
-	getSoundEffect(): SoundEffect | null;
-	interrupt(): void;
+	interrupt(): boolean;
 	render(ctx: CanvasRenderingContext2D): void;
+	getBoundingRect(): Rectangle;
 }

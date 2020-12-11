@@ -1,12 +1,13 @@
-import {limitRange, Point} from "../utils/math";
+import {interpolateLinear} from "../utils/math";
 import {PointsTail} from "../tail/PointsTail";
 import {AbstractExplosionType1, AbstractExplosionType1Element} from "./abstract-explosion-type1";
+import {FireworkType} from "../fireworks-builder";
 
 const ANGLE_DEVIATION_FACTOR: number = 0.02;
 const DISTANCE_DEVIATION_FACTOR: number = 0.05;
 const TAIL_LENGTH: number = 9;
 const POINT_SIZE: number = 2;
-const DURATION: number = 20;
+export const TYPE1_SPHERE_DURATION: number = 20;
 const TAIL_HAS_EVERY_POINT: number = 3;
 
 export enum Type1SphereExplosionLimits {
@@ -17,27 +18,22 @@ export enum Type1SphereExplosionLimits {
 }
 
 export class Type1SphereExplosion extends AbstractExplosionType1 {
-	constructor(
-		colors: string[],
-		pos: Point,
-		distance: number = Type1SphereExplosionLimits.MIN_DISTANCE,
-		elementsCount: number = Type1SphereExplosionLimits.MIN_ELEMENTS
-	) {
-		distance = limitRange(
-			distance,
-			Type1SphereExplosionLimits.MAX_DISTANCE,
-			Type1SphereExplosionLimits.MIN_DISTANCE
+	constructor(firework: FireworkType) {
+		const distance: number = interpolateLinear(
+			firework.sizeFactor ?? 0.5,
+			Type1SphereExplosionLimits.MIN_DISTANCE,
+			Type1SphereExplosionLimits.MAX_DISTANCE
 		);
 
-		elementsCount = limitRange(
-			elementsCount,
-			Type1SphereExplosionLimits.MAX_ELEMENTS,
-			Type1SphereExplosionLimits.MIN_ELEMENTS
+		const elementsCount: number = interpolateLinear(
+			firework.elementsFactor ?? 0.5,
+			Type1SphereExplosionLimits.MIN_ELEMENTS,
+			Type1SphereExplosionLimits.MAX_ELEMENTS
 		);
 
-		super(colors, pos, distance, elementsCount);
+		super(firework, distance, elementsCount);
 
-		this.duration = DURATION;
+		this.duration = TYPE1_SPHERE_DURATION;
 	}
 
 	protected generateElements(elementsCount: number): AbstractExplosionType1Element[] {

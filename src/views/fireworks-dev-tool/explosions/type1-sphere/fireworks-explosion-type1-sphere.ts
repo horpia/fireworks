@@ -1,29 +1,18 @@
 import template from "./html.hbs";
 import style from "../../form.scss";
-import {RenderElementInterface} from "../../../../models/render/render-element-interface";
-import {AbstractFireworksExplosionTypeForm} from "../abstract-fireworks-explosion-type-form";
-import {calcAvgInt} from "../../../../models/utils/math";
-import {Type1SphereExplosion, Type1SphereExplosionLimits} from "../../../../models/explosions/type1-sphere-explosion";
+import {AbstractFireworksDevForm} from "../../abstract-fireworks-dev-form";
+import {FireworkType} from "../../../../models/fireworks-builder";
 
-export class FireworksExplosionType1Sphere extends AbstractFireworksExplosionTypeForm {
+export class FireworksExplosionType1Sphere extends AbstractFireworksDevForm {
 	constructor() {
 		super();
-		this.createShadowDom(style, template({
-			distanceMin: Type1SphereExplosionLimits.MIN_DISTANCE,
-			distanceMax: Type1SphereExplosionLimits.MAX_DISTANCE,
-			distance: calcAvgInt(Type1SphereExplosionLimits.MAX_DISTANCE, Type1SphereExplosionLimits.MIN_DISTANCE),
-			elementsMin: Type1SphereExplosionLimits.MIN_ELEMENTS,
-			elementsMax: Type1SphereExplosionLimits.MAX_ELEMENTS,
-			elements: calcAvgInt(Type1SphereExplosionLimits.MAX_ELEMENTS, Type1SphereExplosionLimits.MIN_ELEMENTS),
-		}));
+		this.createShadowDom(style, template());
 	}
 
-	protected createRenderElement(data:Map<string, string>): RenderElementInterface {
-		return new Type1SphereExplosion(
-			[data.get('color1'), data.get('color2')],
-			this.centerPoint,
-			parseInt(data.get('distance'), 10),
-			parseInt(data.get('elements'), 10)
-		);
+	protected createFirework(data:Map<string, string>): FireworkType {
+		return {
+			colors: [data.get('color1'), data.get('color2')],
+			explosionType: 'type1-sphere'
+		};
 	}
 }
