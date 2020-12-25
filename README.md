@@ -1,6 +1,7 @@
 # Fireworks
 
-Small tool for rendering different fireworks. Created special for celebrating new year 2021 on pikabu.ru.
+A tool for rendering different fireworks. Created special for celebrating new year 2021 on pikabu.ru. 
+Be free to use it as you wish.
 
 [Game demo](https://horpia.github.io/fireworks/build/game1.html)
 
@@ -9,7 +10,7 @@ Small tool for rendering different fireworks. Created special for celebrating ne
 
 ## Example of usage
 
-[Demo of this example](https://horpia.github.io/fireworks/build/demo1.html) 
+[Demo of this example](https://horpia.github.io/fireworks/build/demo.html) 
 
 This code creates one random explosion (without rocket and launching) every second: 
 
