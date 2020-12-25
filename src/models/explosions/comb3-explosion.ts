@@ -23,6 +23,11 @@ export class Comb3Explosion extends RenderList {
 			sizeFactor: firework.sizeFactor ?? 0.5,
 			elementsFactor: firework.elementsFactor ?? 0.5
 		});
+
+		if (firework.noSound) {
+			exp1.sound = null;
+		}
+
 		this.add(exp1);
 
 		const exp2: Type1DiskExplosion = new Type1DiskExplosion({

@@ -95,11 +95,13 @@ export class FireworksCanvas extends AbstractCustomElement {
 			return;
 		}
 
-		if (!this.fireworks.has(firework)) {
+		if (!firework.canBeLaunched) {
 			return;
 		}
 
-		if (!firework.canBeLaunched) {
+		if (!this.fireworks.has(firework)) {
+			firework.autoLaunch = true;
+			this.addFirework(firework).then();
 			return;
 		}
 

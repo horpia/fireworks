@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Fireworks Demo</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<fw-canvas id="fw" width="800" height="600" bg-color="#000" bg-image="" sounds-url="./sounds"></fw-canvas>
+<script src="fireworks.js"></script>
+<script>
+	const fw = document.querySelector('#fw');
+	setInterval(() => {
+		if (document.hidden) {
+			// ignore if page is not visible
+			return;
+		}
+
+		const firework = fw.getRandomFirework({x: 400, y: 300});
+		// remove rocket, we need only explosion
+		firework.rocketType = '';
+		fw.addFirework(firework);
+	}, 1000);
+</script>
+</body>
+</html>

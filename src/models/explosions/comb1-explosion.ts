@@ -23,8 +23,9 @@ export class Comb1Explosion extends RenderList {
 			elementsFactor: firework.elementsFactor ?? 0.5
 		});
 
-
-		if (!firework.noSound) {
+		if (firework.noSound) {
+			exp1.sound = null;
+		} else {
 			exp1.sound = new SoundEffect(SoundEffectsList.EXPLOSION_FIZZ);
 		}
 

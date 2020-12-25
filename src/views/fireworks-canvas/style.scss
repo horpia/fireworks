@@ -1,8 +1,10 @@
-:host([fullscreen]) {
-	position: relative;
+:host {
 	display: block;
+	position: relative;
 }
 
-canvas {
+canvas[data-role="front"] {
 	position: absolute;
+	left: 0;
+	top: 0;
 }

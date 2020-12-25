@@ -21,6 +21,10 @@ export class Comb4Explosion extends RenderList {
 			elementsFactor: 0
 		});
 
+		if (firework.noSound) {
+			exp1.sound = null;
+		}
+
 		this.add(exp1);
 
 		const distanceType1: number = interpolateLinear(
@@ -44,6 +48,11 @@ export class Comb4Explosion extends RenderList {
 				sizeFactor: firework.sizeFactor,
 				elementsFactor: firework.elementsFactor,
 			});
+
+			if (firework.noSound) {
+				exp2.sound = null;
+			}
+
 			this.add(exp2, START_DELAY + DELAY_BETWEEN_EXPLOSIONS * i);
 		}
 	}

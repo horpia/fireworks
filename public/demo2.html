@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Fireworks Demo</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<button onclick="showDemo()" style="margin-bottom: 10px">Launch!</button>
+<fw-canvas id="fw" width="800" height="600" bg-color="#000" bg-image="" sounds-url="./sounds"></fw-canvas>
+<script src="fireworks.js"></script>
+<script>
+	function showDemo() {
+		const fw = document.querySelector('fw-canvas');
+		fw.addFirework({
+			position: {x: 400, y: 560},
+			colors: ['#fa5252', '#6db4ff', '#8cff41'],
+			rocketColors: ['#ac63c6'],
+			angleFactor: 0.5,
+			sizeFactor: 0.8,
+			elementsFactor: 0.9,
+			rocketType: 'type1',
+			explosionType: 'comb1',
+			canBeLaunched: true,
+			autoLaunch: true,
+			rocketFading: false,
+			noSound: true,
+		});
+	}
+</script>
+</body>
+</html>

@@ -32,6 +32,10 @@ export class Comb2Explosion extends RenderList {
 			elementsFactor: firework.elementsFactor ?? 0.5
 		});
 
+		if (firework.noSound) {
+			exp1.sound = null;
+		}
+
 		this.add(exp1);
 
 		const type0ElementsCount: number = TYPE0_ELEMENTS_COUNT;
@@ -51,6 +55,10 @@ export class Comb2Explosion extends RenderList {
 				sizeFactor: 0,
 				elementsFactor: 0
 			});
+
+			if (firework.noSound) {
+				exp2.sound = null;
+			}
 
 			this.add(exp2, delay);
 
