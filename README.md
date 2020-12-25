@@ -1,7 +1,6 @@
 # Fireworks
 
 A tool for rendering different fireworks. Created special for celebrating new year 2021 on pikabu.ru. 
-Be free to use it as you wish.
 
 [Game demo](https://horpia.github.io/fireworks/build/game1.html)
 

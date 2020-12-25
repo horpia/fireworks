@@ -6,21 +6,24 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
+<button onclick="showDemo()" style="margin-bottom: 10px">Launch!</button>
 <fw-canvas id="fw" width="800" height="600" bg-color="#000" bg-image="" sounds-url="./sounds"></fw-canvas>
 <script src="fireworks.js"></script>
 <script>
-	const fw = document.querySelector('#fw');
-	setInterval(() => {
-		if (document.hidden) {
-			// ignore if page is not visible
-			return;
-		}
+	function showDemo() {
+		const fw = document.querySelector('#fw');
+		setInterval(() => {
+			if (document.hidden) {
+				// ignore if page is not visible
+				return;
+			}
 
-		const firework = fw.getRandomFirework({x: 400, y: 300});
-		// remove rocket, we need only explosion
-		firework.rocketType = '';
-		fw.addFirework(firework);
-	}, 1000);
+			const firework = fw.getRandomFirework({x: 400, y: 300});
+			// remove rocket, we need only explosion
+			firework.rocketType = '';
+			fw.addFirework(firework);
+		}, 1000);
+	}
 </script>
 </body>
 </html>
