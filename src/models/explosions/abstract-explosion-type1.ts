@@ -18,7 +18,9 @@ export type AbstractExplosionType1Element = Point & {
 const POINT_SIZE: number = 2;
 const POINT_HALF_SIZE: number = POINT_SIZE / 2;
 const GLOW_RADIUS: number = 6;
+const GLOW_OPACITY: number = 0.3;
 const FINAL_FADE_DURATION: number = 10;
+const FALL_SPEED: number = 1;
 
 export abstract class AbstractExplosionType1 implements RenderElementInterface {
 	public sound: SoundEffect | null = null;
@@ -38,16 +40,19 @@ export abstract class AbstractExplosionType1 implements RenderElementInterface {
 		elementsCount: number
 	) {
 		this.colors = firework.colors || [DEFAULT_COLOR];
-		this.pos = firework.position || {x: 0, y: 0};
+		this.pos = {...(firework.position || {x: 0, y: 0})};
 		this.elements = this.generateElements(elementsCount);
 		this.explosionType0 = new Type0Explosion({
 			colors: [this.colors[0]],
 			position: this.pos,
 			sizeFactor: firework.sizeFactor ?? 0.5,
-			elementsFactor: firework.elementsFactor ?? 0.5
+			elementsFactor: firework.elementsFactor ?? 0.5,
+			noSound: true
 		});
-		this.explosionType0.sound = null;
-		this.sound = new SoundEffect(SoundEffectsList.EXPLOSION_2);
+		
+		if (!firework.noSound) {
+			this.sound = new SoundEffect(SoundEffectsList.EXPLOSION_2);
+		}
 	}
 
 	protected abstract generateElements(elementsCount: number): AbstractExplosionType1Element[];
@@ -103,10 +108,12 @@ export abstract class AbstractExplosionType1 implements RenderElementInterface {
 
 		this.value = easeOutExpo(Math.min(1, this.time / this.duration));
 
+		const y: number = this.time * FALL_SPEED;
+
 		for (const el of this.elements) {
 			const dist: number = this.value * el.distance;
-			el.x = el.xFactor * dist;
-			el.y = el.yFactor * dist;
+			el.x = el.xFactor * dist + el.xFactor * y;
+			el.y = el.yFactor * dist + y;
 			el.tail?.addPoint({x: el.x, y: el.y});
 		}
 
@@ -125,7 +132,7 @@ export abstract class AbstractExplosionType1 implements RenderElementInterface {
 
 		// draw glows
 		if (this.time < this.duration) {
-			ctx.globalAlpha = 0.3 * this.opacity;
+			ctx.globalAlpha = GLOW_OPACITY * this.opacity;
 
 			for (const el of this.elements) {
 				ctx.fillStyle = el.color;

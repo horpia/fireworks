@@ -45,7 +45,10 @@ export class Type0Explosion implements RenderElementInterface {
 				Type0ExplosionLimits.MAX_PEAKS
 			) * 2
 		);
-		this.sound = new SoundEffect(SoundEffectsList.EXPLOSION_1);
+
+		if (!firework.noSound) {
+			this.sound = new SoundEffect(SoundEffectsList.EXPLOSION_1);
+		}
 	}
 
 	getBoundingRect(): Rectangle {

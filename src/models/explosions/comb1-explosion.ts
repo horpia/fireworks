@@ -23,7 +23,10 @@ export class Comb1Explosion extends RenderList {
 			elementsFactor: firework.elementsFactor ?? 0.5
 		});
 
-		exp1.sound = new SoundEffect(SoundEffectsList.EXPLOSION_FIZZ);
+
+		if (!firework.noSound) {
+			exp1.sound = new SoundEffect(SoundEffectsList.EXPLOSION_FIZZ);
+		}
 
 		const exp2: Type2Explosion = new Type2Explosion({
 			colors: [sparksColor],

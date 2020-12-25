@@ -1,0 +1,330 @@
+:host {
+	--snow-color: #b1bece;
+	--snow-color-light: #ccd8ea;
+	--snow-color-dark1: #7c92ac;
+	--snow-color-dark2: #444f5f;
+	--lives-color: #fa6476;
+	--score-color: #fff7c1;
+
+	display: block;
+	font-family: Tahoma, Helvetica, Arial, sans-serif;
+	color: var(--snow-color);
+	font-size: 14px;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: var(--z-index, 100000);
+	touch-action: none;
+}
+
+@mixin show-up() {
+	transform: scale(0);
+	opacity: 0;
+	animation-name: slow-show-up;
+	animation-duration: 0.5s;
+	animation-fill-mode: forwards;
+	animation-timing-function: ease-in;
+}
+
+@mixin hide-off() {
+	transform: scale(1);
+	opacity: 1;
+	animation-name: slow-hide-off;
+	animation-delay: initial;
+	animation-duration: 0.5s;
+	animation-fill-mode: forwards;
+	animation-timing-function: ease-out;
+}
+
+.close-button {
+	position: absolute;
+	top: 30px;
+	right: 30px;
+	cursor: pointer;
+	@include show-up();
+
+	svg {
+		fill: var(--snow-color);
+	}
+
+	&:hover {
+		svg {
+			fill: var(--snow-color-light);
+		}
+	}
+
+	&:active {
+		svg {
+			fill: var(--snow-color-dark1);
+		}
+	}
+}
+
+.mute-button {
+	position: absolute;
+	top: 80px;
+	right: 24px;
+	cursor: pointer;
+	@include show-up();
+
+	svg {
+		fill: var(--snow-color);
+	}
+
+	&:hover {
+		svg {
+			fill: var(--snow-color-light);
+		}
+	}
+
+	&:active {
+		svg {
+			fill: var(--snow-color-dark1);
+		}
+	}
+
+	:host(.muted) & {
+		svg {
+			fill: var(--lives-color);
+		}
+
+		&:hover {
+			svg {
+				fill: var(--lives-color);
+			}
+		}
+
+		&:active {
+			svg {
+				fill: var(--lives-color);
+			}
+		}
+	}
+}
+
+.turn-off-button {
+	position: absolute;
+	top: 130px;
+	right: 30px;
+	cursor: pointer;
+	@include show-up();
+
+	.mute-button[hidden] + & {
+		top: 80px;
+	}
+
+	svg {
+		fill: var(--snow-color);
+	}
+
+	&:hover {
+		svg {
+			fill: var(--snow-color-light);
+		}
+	}
+
+	&:active {
+		svg {
+			fill: var(--snow-color-dark1);
+		}
+	}
+}
+
+.caption {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	left: 0;
+	bottom: 370px;
+	user-select: none;
+	opacity: 0;
+
+	:host(.game-started) & {
+		@include show-up();
+	}
+}
+
+.start-button {
+	position: absolute;
+	background-color: var(--snow-color);
+	padding: 8px 16px;
+	border-radius: 16px;
+	color: var(--snow-color-dark2);
+	border-bottom: 3px solid var(--snow-color-dark1);
+	cursor: pointer;
+	user-select: none;
+	left: 50%;
+	bottom: 300px;
+	margin-left: -60px;
+	animation-delay: 0.5s;
+	@include show-up();
+
+	:host(.game-started) & {
+		@include hide-off();
+	}
+
+	&:hover {
+		background-color: var(--snow-color-light);
+	}
+
+	&:active {
+		margin-top: 2px;
+		border-bottom: 1px solid var(--snow-color-dark2);
+	}
+}
+
+.lives {
+	position: absolute;
+	width: 100px;
+	left: 50%;
+	margin-left: -180px;
+	bottom: 300px;
+	user-select: none;
+	font-size: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	transition: margin-bottom 0.1s ease-in-out;
+	opacity: 0;
+
+	:host(.game-started) & {
+		@include show-up();
+	}
+
+	span {
+		margin-left: 10px;
+	}
+
+	svg {
+		fill: var(--snow-color-dark1);
+	}
+
+	&.highlight {
+		color: var(--lives-color);
+		margin-bottom: -5px;
+
+		svg {
+			fill: var(--lives-color);
+		}
+	}
+}
+
+.score {
+	position: absolute;
+	width: 100px;
+	left: 50%;
+	margin-left: 80px;
+	bottom: 300px;
+	user-select: none;
+	font-size: 32px;
+	display: flex;
+	align-items: center;
+	transition: margin-bottom 0.1s ease-in-out;
+	opacity: 0;
+
+	:host(.game-started) & {
+		@include show-up();
+	}
+
+	span {
+		margin-left: 10px;
+	}
+
+	svg {
+		fill: var(--snow-color-dark1);
+	}
+
+	&.highlight {
+		color: var(--score-color);
+		margin-bottom: 5px;
+
+		svg {
+			fill: var(--score-color);
+		}
+	}
+}
+
+.score-final {
+	position: absolute;
+	width: 400px;
+	left: 50%;
+	margin-left: -200px;
+	bottom: 360px;
+	user-select: none;
+	opacity: 0;
+	animation-delay: 0.5s;
+	@include show-up();
+
+	:host(.game-started) & {
+		@include hide-off();
+	}
+
+	.current-score {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		span {
+			margin-left: 10px;
+			font-size: 32px;
+			color: var(--score-color);
+		}
+
+		svg {
+			fill: var(--score-color);
+		}
+	}
+
+	.best-score {
+		margin-top: 10px;
+		font-size: 14px;
+		text-align: center;
+		color: var(--snow-color-dark1);
+
+		span {
+			color: var(--score-color);
+		}
+	}
+}
+
+@media screen and (max-width: 800px) {
+	.start-button {
+		display: none;
+	}
+
+	.score {
+		display: none;
+	}
+
+	.score-final {
+		display: none;
+	}
+
+	.caption {
+		display: none;
+	}
+}
+
+@keyframes slow-show-up {
+	from {
+		transform: scale(0);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes slow-hide-off {
+	from {
+		transform: scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: scale(0);
+		opacity: 0;
+	}
+}

@@ -22,9 +22,7 @@ export class FireworksDevTool extends AbstractFireworksDevElement {
 
 	constructor() {
 		super();
-		this.createShadowDom(style + formStyle, template({
-			for: this.getAttribute('for')
-		}));
+		this.createShadowDom(style + formStyle, template({}));
 
 		this.shadowRoot.addEventListener(EVENT_ADD_FIREWORK_ELEMENT, this.addToRenderList.bind(this));
 		this.outputJsonEl = this.shadowRoot.querySelector('.output-json');
@@ -51,7 +49,7 @@ export class FireworksDevTool extends AbstractFireworksDevElement {
 			y: canvas.height - 100
 		});
 		this.outputJsonEl.textContent = JSON.stringify(firework, null, ' ');
-		this.targetCanvas.addFirework(firework);
+		this.targetCanvas.addFirework(firework).then();
 	}
 
 	private addToRenderList(e: CustomEvent): void {
@@ -60,6 +58,6 @@ export class FireworksDevTool extends AbstractFireworksDevElement {
 		}
 
 		this.outputJsonEl.textContent = JSON.stringify(e.detail, null, ' ');
-		this.targetCanvas.addFirework(e.detail as FireworkType);
+		this.targetCanvas.addFirework(e.detail as FireworkType).then();
 	}
 }

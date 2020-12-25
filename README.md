@@ -1,3 +1,1 @@
 # Fireworks
-
-Work in progress ;)

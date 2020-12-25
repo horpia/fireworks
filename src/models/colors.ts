@@ -13,14 +13,14 @@ export const COLORS: string[] = [
 export const DEFAULT_COLOR: string = '#fff';
 
 export const COLORS_ROCKETS: string[] = [
-	'#cd7474',
+	'#a95e47',
 	'#bca047',
-	'#a0b76d',
-	'#87ba96',
-	'#74b2b3',
-	'#7d9fb3',
+	'#819d4a',
+	'#7ed070',
+	'#73bbc8',
+	'#8a8bf5',
 	'#ab80bc',
-	'#a97c95',
+	'#ec2f8d',
 	'#acaca3',
 ];
 

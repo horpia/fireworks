@@ -17,12 +17,19 @@ export class Renderer {
 	private bgImage: HTMLImageElement | null = null;
 	private bgColor: string = '';
 	private globalOpacity: number = 0;
+	private glowCanvas: HTMLCanvasElement;
+	private glowCanvasContext: CanvasRenderingContext2D;
+	private glowTime: number = 0;
+	private renderObservers: Set<() => void>;
+	private nextRenderHandlers: Set<() => void>;
 
 	constructor(renderList: RenderList, context: CanvasRenderingContext2D) {
 		this.renderList = renderList;
 		this.context = context;
 		this.requestNextRender = window.requestAnimationFrame;
 		this.renderCallback = this.render.bind(this);
+		this.renderObservers = new Set<() => void>();
+		this.nextRenderHandlers = new Set<() => void>();
 	}
 
 	get canvas(): HTMLCanvasElement {
@@ -57,11 +64,24 @@ export class Renderer {
 		});
 	}
 
+	useGlowTail(): void {
+		if (this.glowCanvas) {
+			return;
+		}
+
+		const canvas: HTMLCanvasElement = this.context.canvas;
+		this.glowCanvas = document.createElement('canvas');
+		this.glowCanvas.width = canvas.width;
+		this.glowCanvas.height = canvas.height;
+		this.glowCanvasContext = this.glowCanvas.getContext('2d');
+	}
+
 	start(): Renderer {
 		if (this.started) {
 			this.finish();
 		}
 
+		this.glowTime = 0;
 		this.globalOpacity = 0;
 		this.started = true;
 		this.render();
@@ -74,8 +94,15 @@ export class Renderer {
 		return this;
 	}
 
-	requestRender() {
+	observe(callback: () => void): void {
+		this.renderObservers.add(callback);
+	}
+
+	requestRender(handler: () => void = null) {
 		this.needRender = true;
+		if (handler !== null) {
+			this.nextRenderHandlers.add(handler);
+		}
 	}
 
 	private render(): void {
@@ -90,7 +117,18 @@ export class Renderer {
 		this.nextFrameTime = time + FRAME_TIME;
 		this.renderList.interrupt();
 
-		if (!this.renderList.needRender && !this.needRender && this.globalOpacity >= 1) {
+		if (this.nextRenderHandlers.size > 0) {
+			this.nextRenderHandlers.forEach(handler => handler());
+			this.nextRenderHandlers.clear();
+		}
+
+		const canvas: HTMLCanvasElement = this.context.canvas;
+
+		if (
+			!this.renderList.needRender
+			&& !this.needRender
+			&& this.globalOpacity >= 1
+			&& this.glowTime === 0) {
 			return;
 		}
 
@@ -98,10 +136,11 @@ export class Renderer {
 			this.globalOpacity += GLOBAL_OPACITY_STEP;
 		}
 
-		this.needRender = false;
+		this.prepareCanvasBeforeRender();
 
-		const canvas: HTMLCanvasElement = this.context.canvas;
-		this.context.clearRect(0, 0, canvas.width, canvas.height);
+		if ((this.renderList.needRender || this.needRender) && this.glowCanvas) {
+			this.glowTime = 5;
+		}
 		this.context.globalAlpha = this.globalOpacity;
 
 		if (this.bgColor) {
@@ -111,7 +150,34 @@ export class Renderer {
 
 		this.drawBgImage();
 
+		this.needRender = false;
+
 		this.renderList.render(this.context);
+
+		if (this.renderObservers.size > 0) {
+			this.renderObservers.forEach(observer => observer());
+		}
+	}
+
+	private prepareCanvasBeforeRender(): void {
+		const canvas: HTMLCanvasElement = this.context.canvas;
+
+		if (this.glowCanvasContext && this.glowTime > 1) {
+			if (this.glowCanvas.width !== canvas.width || this.glowCanvas.height !== canvas.height) {
+				this.glowCanvas.width = canvas.width;
+				this.glowCanvas.height = canvas.height;
+			}
+
+			this.glowCanvasContext.clearRect(0, 0, canvas.width, canvas.height);
+			this.glowCanvasContext.drawImage(canvas, 0, 0);
+			this.context.clearRect(0, 0, canvas.width, canvas.height);
+			this.context.globalAlpha = 0.5;
+			this.context.drawImage(this.glowCanvas, 0, 0);
+			this.context.globalAlpha = 1;
+			this.glowTime--;
+		} else {
+			this.context.clearRect(0, 0, canvas.width, canvas.height);
+		}
 	}
 
 	private drawBgImage(): void {
@@ -119,7 +185,7 @@ export class Renderer {
 			return;
 		}
 
-		const width: number = this.bgImage.naturalWidth - 1;
+		const width: number = this.bgImage.naturalWidth;
 		const y: number = this.canvas.height - this.bgImage.naturalHeight;
 		const times: number = Math.ceil(this.canvas.width / width);
 

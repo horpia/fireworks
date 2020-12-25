@@ -41,6 +41,7 @@ const TAIL_VALUE_STEP: number = 0.05;
 const TAIL_POINTS_COUNT: number = 60;
 const TAIL_POINT_SIZE: number = 2;
 const TAIL_START_VALUE: number = 0.2;
+const START_FADE_STEP: number = 0.1;
 
 export enum RocketStages {
 	WAIT,
@@ -60,13 +61,18 @@ export abstract class AbstractRocket implements RenderElementInterface {
 	protected fromPos: Point;
 	protected anchorPos: Point;
 	protected sound: SoundEffect;
-	private prevValue: number = 0;
-	private tail: PointsTail;
 	protected readonly widthHalf: number;
 	protected readonly widthQuarter: number;
 	protected readonly heightHalf: number;
 	protected readonly heightQuarter: number;
 	protected pos: Point;
+
+	private prevValue: number = 0;
+	private tail: PointsTail;
+	private opacity: number = 1;
+	private readonly launchCallback: () => void;
+
+	readonly canBeLaunched: boolean = true;
 
 	protected constructor(
 		firework: FireworkType,
@@ -86,8 +92,20 @@ export abstract class AbstractRocket implements RenderElementInterface {
 		this.generateFinalPos();
 		this.generateAnchorPos();
 
+		if (typeof firework.onLaunch === 'function') {
+			this.launchCallback = firework.onLaunch;
+		}
+
+		if (firework.canBeLaunched === false) {
+			this.canBeLaunched = false;
+		}
+
 		if (firework.autoLaunch === true) {
 			this.launch();
+		}
+
+		if (firework.rocketFading === true) {
+			this.opacity = 0;
 		}
 	}
 
@@ -96,10 +114,10 @@ export abstract class AbstractRocket implements RenderElementInterface {
 
 	getBoundingRect(): Rectangle {
 		return {
-			x: this.pos.x - this.width,
-			y: this.pos.y - this.height,
-			width: this.width * 2,
-			height: this.height * 2,
+			x: this.pos.x - (this.width << 1),
+			y: this.pos.y - (this.height << 1),
+			width: (this.width << 2),
+			height: (this.height << 2),
 		};
 	}
 
@@ -109,15 +127,28 @@ export abstract class AbstractRocket implements RenderElementInterface {
 	}
 
 	launch(): AbstractRocket {
+		if (!this.canBeLaunched) {
+			return this;
+		}
+
 		if (this.stage === RocketStages.WAIT) {
 			this.stage = RocketStages.INCREASE_SPARK;
 		}
+
+		if (this.launchCallback) {
+			this.launchCallback();
+		}
+
 		return this;
 	}
 
 	interrupt(): boolean {
+		if (this.opacity < 1) {
+			this.opacity = Math.min(1, this.opacity + START_FADE_STEP);
+		}
+
 		if (this.stage === RocketStages.WAIT) {
-			return false;
+			return this.opacity < 1;
 		}
 
 		if (this.sound?.play() === false) {
@@ -146,6 +177,7 @@ export abstract class AbstractRocket implements RenderElementInterface {
 		}
 
 		ctx.translate(this.pos.x, this.pos.y);
+		ctx.globalAlpha = this.opacity;
 		ctx.rotate(this.angle * DEG_TO_RAD);
 		this.drawRocket(ctx);
 

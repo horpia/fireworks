@@ -15,16 +15,24 @@ import {Type0Rocket} from "./rockets/type0-rocket";
 import {Type1Rocket} from "./rockets/type1-rocket";
 import {RenderElementInterface} from "./render/render-element-interface";
 import {AbstractRocket} from "./rockets/abstract-rocket";
+import {RenderCallback} from "./render/render-list";
 
 export type FireworkType = {
 	position?: Point,
 	colors?: string[],
+	rocketColors?: string[],
 	angleFactor?: number,
 	sizeFactor?: number,
 	elementsFactor?: number,
 	rocketType?: string,
 	explosionType?: string,
-	autoLaunch?: boolean
+	canBeLaunched?: boolean,
+	autoLaunch?: boolean,
+	rocketFading?: boolean,
+	noSound?: boolean,
+	onLaunch?: () => void,
+	onBeforeRender?: RenderCallback,
+	onAfterRender?: RenderCallback,
 }
 
 enum PRIMITIVE_EXPLOSION_TYPES {
@@ -107,6 +115,8 @@ export class FireworksBuilder {
 			sizeFactor: getFixedRandom(),
 			elementsFactor: getFixedRandom(),
 			angleFactor: getFixedRandom(),
+			rocketFading: true,
+			canBeLaunched: true,
 			position,
 			autoLaunch,
 		};

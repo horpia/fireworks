@@ -2,7 +2,11 @@ const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-	entry: './src/index.ts',
+	entry: {
+		fireworks: './src/index.ts',
+		devtool: './src/devtool.ts',
+		game1: './src/game1.ts',
+	},
 	module: {
 		rules: [
 			{
@@ -43,10 +47,11 @@ module.exports = {
 		extensions: ['.tsx', '.ts', '.js'],
 	},
 	output: {
-		filename: 'index.js',
+		filename: '[name].js',
 		path: path.resolve(__dirname, 'build'),
 	},
 	devServer: {
+		allowedHosts: ['bs-local.com'],
 		contentBase: __dirname + '/public',
 		port: 10000
 	}

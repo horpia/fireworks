@@ -39,8 +39,11 @@ export class Type0Rocket extends AbstractRocket {
 		);
 
 		super(firework, canvas, angle, size * BODY_WIDTH, size * BODY_HEIGHT);
-		this.color = (firework.colors && firework.colors[0]) || getRandomColors(1, COLORS_ROCKETS)[0];
-		this.sound = new SoundEffect(SoundEffectsList.LAUNCH_1);
+		this.color = (firework.rocketColors && firework.rocketColors[0]) || getRandomColors(1, COLORS_ROCKETS)[0];
+
+		if (!firework.noSound) {
+			this.sound = new SoundEffect(SoundEffectsList.LAUNCH_1);
+		}
 	}
 
 	protected drawRocket(ctx: CanvasRenderingContext2D): void {

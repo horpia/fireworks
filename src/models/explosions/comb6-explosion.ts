@@ -26,7 +26,10 @@ export class Comb6Explosion extends RenderList {
 			elementsFactor: firework.elementsFactor ?? 0.5
 		});
 
-		exp1.sound = new SoundEffect(SoundEffectsList.EXPLOSION_2);
+		if (!firework.noSound) {
+			exp1.sound = new SoundEffect(SoundEffectsList.EXPLOSION_2);
+		}
+
 		this.add(exp1);
 
 		for (let i: number = 0; i < colors.length; i++) {

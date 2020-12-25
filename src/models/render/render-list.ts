@@ -6,15 +6,23 @@ type RenderListWaitElement = {
 	wait: number
 };
 
+export interface RenderCallback {
+	(ctx: CanvasRenderingContext2D): void
+}
+
 export class RenderList implements RenderElementInterface {
 	protected readonly list: Set<RenderElementInterface>;
 	protected readonly waitList: Set<RenderListWaitElement>;
+	protected readonly beforeRenderCallbacks: WeakMap<RenderElementInterface, RenderCallback>;
+	protected readonly afterRenderCallbacks: WeakMap<RenderElementInterface, RenderCallback>;
 	protected isChangedByInterruption: boolean = false;
 	protected isChangedList: boolean = false;
 
 	constructor() {
 		this.list = new Set<RenderElementInterface>();
 		this.waitList = new Set<RenderListWaitElement>();
+		this.beforeRenderCallbacks = new WeakMap<RenderElementInterface, RenderCallback>();
+		this.afterRenderCallbacks = new WeakMap<RenderElementInterface, RenderCallback>();
 	}
 
 	clear(): void {
@@ -23,7 +31,12 @@ export class RenderList implements RenderElementInterface {
 		this.isChangedList = true;
 	}
 
-	add(el: RenderElementInterface, delayTimes: number = 0): RenderList {
+	add(
+		el: RenderElementInterface,
+		delayTimes: number = 0,
+		beforeRender: RenderCallback = null,
+		afterRender: RenderCallback = null
+	): RenderList {
 		if (delayTimes > 0) {
 			this.waitList.add({
 				element: el,
@@ -33,8 +46,29 @@ export class RenderList implements RenderElementInterface {
 			this.list.add(el);
 		}
 
+		if (typeof beforeRender === 'function') {
+			this.beforeRenderCallbacks.set(el, beforeRender);
+		}
+
+		if (typeof afterRender === 'function') {
+			this.afterRenderCallbacks.set(el, afterRender);
+		}
+
 		this.isChangedList = true;
 
+		return this;
+	}
+
+	remove(el: RenderElementInterface): RenderList {
+		for (const waitItem of this.waitList) {
+			if (waitItem.element === el) {
+				this.waitList.delete(waitItem);
+				break;
+			}
+		}
+
+		this.list.delete(el);
+		this.isChangedList = true;
 		return this;
 	}
 
@@ -112,9 +146,21 @@ export class RenderList implements RenderElementInterface {
 		this.isChangedByInterruption = false;
 
 		for (const el of this.list) {
+			if (this.beforeRenderCallbacks.has(el)) {
+				ctx.save();
+				this.beforeRenderCallbacks.get(el)(ctx);
+				ctx.restore();
+			}
+
 			ctx.save();
 			el.render(ctx);
 			ctx.restore();
+
+			if (this.afterRenderCallbacks.has(el)) {
+				ctx.save();
+				this.afterRenderCallbacks.get(el)(ctx);
+				ctx.restore();
+			}
 		}
 	}
 }

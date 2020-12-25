@@ -1,8 +1,7 @@
 
 const cache: Map<string, HTMLAudioElement> = new Map<string, HTMLAudioElement>();
-const loading: Map<string, Promise<boolean>> = new Map<string, Promise<boolean>>();
 
-const DEFAULT_VOLUME: number = 0.4;
+const DEFAULT_VOLUME: number = 0.3;
 
 export enum SoundEffectsList {
 	LAUNCH_1 = 'launch-1.mp3',
@@ -11,11 +10,13 @@ export enum SoundEffectsList {
 	EXPLOSION_FIZZ = 'explosion-fizz.mp3',
 }
 
+let globalVolume: number = DEFAULT_VOLUME;
+let globalDisableFlag: boolean = false;
+
 export class SoundEffect {
 	static assetsUrl: string = './sounds';
 
 	private audio: HTMLAudioElement;
-	private readyToPlay: boolean = false;
 	private wasPlayed: boolean = false;
 	private canPlay: boolean = true;
 	private isLoading: boolean = false;
@@ -25,12 +26,27 @@ export class SoundEffect {
 		this.filePath = SoundEffect.assetsUrl + '/' + this.fileName;
 		if (cache.has(this.filePath)) {
 			this.audio = cache.get(this.filePath).cloneNode(true) as HTMLAudioElement;
-			this.audio.volume = DEFAULT_VOLUME;
-			this.readyToPlay = true;
+			this.audio.volume = globalVolume;
 		}
 	}
 
+	static get disabled(): boolean {
+		return globalDisableFlag;
+	}
+
+	static set disabled(flag: boolean) {
+		globalDisableFlag = flag;
+	}
+
+	static muteAll(flag: boolean): void {
+		globalVolume = flag ? 0 : DEFAULT_VOLUME;
+	}
+
 	play(): boolean {
+		if (globalDisableFlag) {
+			return true;
+		}
+
 		if (this.wasPlayed || !this.canPlay) {
 			return true;
 		}
@@ -44,53 +60,36 @@ export class SoundEffect {
 		return false;
 	}
 
-	async preloadFile(): Promise<boolean> {
-		if (loading.has(this.filePath)) {
-			return loading.get(this.filePath);
+	preloadFile(): void {
+		if (cache.has(this.filePath)) {
+			return;
 		}
 
-		const promise: Promise<boolean> = new Promise(resolve => {
-			const audio: HTMLAudioElement = new Audio();
-			audio.volume = 0.5;
-			audio.autoplay = false;
+		const audio: HTMLAudioElement = new Audio();
+		audio.volume = globalVolume;
+		audio.autoplay = false;
+		audio.src = this.filePath;
 
-			audio.addEventListener('canplaythrough', () => {
-				cache.set(this.filePath, audio);
-				this.audio = audio;
-				this.audio.volume = DEFAULT_VOLUME;
-				this.readyToPlay = true;
-				resolve(true);
-			});
-
-			audio.addEventListener('error', () => {
-				resolve(false);
-			});
-
-			audio.src = this.filePath;
-		});
-
-		loading.set(this.filePath, promise);
-
-		return promise;
+		cache.set(this.filePath, audio);
 	}
 
 
-	protected async playWhenReady(): Promise<boolean> {
+	protected async playWhenReady(): Promise<void> {
+		if (globalDisableFlag) {
+			return;
+		}
+
 		this.isLoading = true;
 
 		if (!cache.has(this.filePath)) {
-			const res: boolean = await this.preloadFile();
-			if (!res) {
-				return false;
-			}
+			this.preloadFile();
 		}
 
 		if (!this.audio) {
 			this.audio = cache.get(this.filePath).cloneNode(true) as HTMLAudioElement;
 		}
 
-		this.audio.volume = DEFAULT_VOLUME;
-		this.readyToPlay = true;
+		this.audio.volume = globalVolume;
 		this.wasPlayed = true;
 		await this.audio.play();
 

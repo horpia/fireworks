@@ -59,6 +59,7 @@ export class FireworksRocketsForm extends AbstractFireworksDevElement {
 		firework.sizeFactor = parseFloat(formData.get('distance').toString());
 		firework.angleFactor = parseFloat(formData.get('angle').toString());
 		firework.autoLaunch = true;
+		firework.rocketFading = false;
 
 		this.dispatchEvent(
 			new CustomEvent(

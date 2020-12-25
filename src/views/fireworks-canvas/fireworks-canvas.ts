@@ -8,34 +8,28 @@ import {RenderElementInterface} from "../../models/render/render-element-interfa
 import {AbstractRocket} from "../../models/rockets/abstract-rocket";
 import {SoundEffect, SoundEffectsList} from "../../models/sounds/sound-effect";
 
-const DEFAULT_BG_COLOR: string = 'rgba(11, 17, 34, 0.8)';
+const DEFAULT_BG_COLOR: string = 'rgba(11, 17, 34, 0.9)';
 
 export class FireworksCanvas extends AbstractCustomElement {
 	private readonly builder: FireworksBuilder;
-	private readonly rendererBack: Renderer;
-	private readonly rendererFront: Renderer;
-	private readonly renderListBack: RenderList;
-	private readonly renderListFront: RenderList;
+	private rendererBack: Renderer;
+	private rendererFront: Renderer;
+	private renderListBack: RenderList;
+	private renderListFront: RenderList;
 	private bgImageLoader: Promise<void>;
-	readonly canvasFront: HTMLCanvasElement;
-	readonly canvasBack: HTMLCanvasElement;
+	private fireworks: WeakMap<FireworkType, RenderElementInterface>;
+	private elements: WeakMap<RenderElementInterface, FireworkType>;
+	private deleteList: WeakSet<FireworkType>;
+	canvasFront: HTMLCanvasElement;
+	canvasBack: HTMLCanvasElement;
 
 	constructor() {
 		super();
-		this.createShadowDom(style, `<canvas data-role="back"></canvas><canvas data-role="front"></canvas>`);
-
-		this.canvasFront = this.shadowRoot.querySelector('canvas[data-role="front"]');
-		this.renderListFront = new RenderList();
-		this.rendererFront = new Renderer(this.renderListFront, this.canvasFront.getContext('2d'));
-
-		this.canvasBack = this.shadowRoot.querySelector('canvas[data-role="back"]');
-		this.renderListBack = new RenderList();
-		this.rendererBack = new Renderer(this.renderListBack, this.canvasBack.getContext('2d'));
-		this.rendererBack.backgroundColor = DEFAULT_BG_COLOR;
-
-		this.shadowRoot.addEventListener('click', this.handleClick.bind(this));
 
 		this.bgImageLoader = Promise.resolve();
+		this.fireworks = new WeakMap<FireworkType, RenderElementInterface>();
+		this.elements = new WeakMap<RenderElementInterface, FireworkType>();
+		this.deleteList = new WeakSet<FireworkType>();
 
 		this.builder = new FireworksBuilder();
 	}
@@ -44,15 +38,26 @@ export class FireworksCanvas extends AbstractCustomElement {
 		return ['fullscreen', 'width', 'height', 'bg-color', 'bg-image', 'sounds-url'];
 	}
 
+	get canvas(): HTMLCanvasElement {
+		return this.canvasFront;
+	}
+
 	async addFirework(firework: FireworkType): Promise<void> {
 		let isAutoLaunch: boolean = firework.autoLaunch || false;
 		const promises: Promise<RenderElementInterface>[] = this.builder.createFirework(firework, this.canvasFront);
 		for (const p of promises) {
 			const el: RenderElementInterface = await p;
-			if (isAutoLaunch) {
-				this.renderListFront.add(el);
+			if (this.deleteList.has(firework)) {
+				return;
+			}
+
+			this.fireworks.set(firework, el);
+			this.elements.set(el, firework);
+
+			if (isAutoLaunch || !firework.canBeLaunched) {
+				this.renderListFront.add(el, 0, firework.onBeforeRender || null, firework.onAfterRender || null);
 			} else {
-				this.renderListBack.add(el);
+				this.renderListBack.add(el, 0, firework.onBeforeRender || null, firework.onAfterRender || null);
 			}
 
 			this.rendererBack.requestRender();
@@ -64,6 +69,20 @@ export class FireworksCanvas extends AbstractCustomElement {
 		return this.builder.getRandomFirework(position, autoLaunch);
 	}
 
+	removeFirework(firework: FireworkType): void {
+		this.deleteList.add(firework);
+
+		if (!this.fireworks.has(firework)) {
+			return;
+		}
+
+		const el: RenderElementInterface = this.fireworks.get(firework);
+		this.renderListFront.remove(el);
+		this.renderListBack.remove(el);
+		this.rendererBack.requestRender();
+		this.rendererFront.requestRender();
+	}
+
 	removeAllFireworks(): void {
 		this.renderListBack.clear();
 		this.renderListFront.clear();
@@ -71,12 +90,41 @@ export class FireworksCanvas extends AbstractCustomElement {
 		this.rendererFront.requestRender();
 	}
 
+	launchFirework(firework: FireworkType): void {
+		if (this.deleteList.has(firework)) {
+			return;
+		}
+
+		if (!this.fireworks.has(firework)) {
+			return;
+		}
+
+		if (!firework.canBeLaunched) {
+			return;
+		}
+
+		const elem: RenderElementInterface = this.fireworks.get(firework);
+
+		if (!(elem instanceof AbstractRocket)) {
+			return;
+		}
+
+		elem.launch();
+	}
+
+	async render(): Promise<void> {
+		return new Promise(resolve => {
+			this.rendererFront.requestRender(resolve);
+		});
+	}
+
 	connectedCallback(): void {
+		this.renderElement();
 		this.updateCanvasSize();
 		window.addEventListener('resize', this.updateCanvasSize);
 
-		this.preloadSounds().then(async () => {
-			await this.bgImageLoader;
+		this.preloadSounds();
+		this.bgImageLoader.then(() => {
 			this.rendererBack.start();
 			this.rendererFront.start();
 		});
@@ -88,33 +136,73 @@ export class FireworksCanvas extends AbstractCustomElement {
 		window.removeEventListener('resize', this.updateCanvasSize);
 	}
 
+	private renderElement(): void {
+		this.createShadowDom(
+			style,
+			`
+				<canvas data-role="back"></canvas>
+				<canvas data-role="front"></canvas>
+			`
+		);
+
+		this.canvasFront = this.shadowRoot.querySelector('canvas[data-role="front"]');
+		this.renderListFront = new RenderList();
+		this.rendererFront = new Renderer(this.renderListFront, this.canvasFront.getContext('2d'));
+		this.rendererFront.useGlowTail();
+
+		this.canvasBack = this.shadowRoot.querySelector('canvas[data-role="back"]');
+		this.renderListBack = new RenderList();
+		this.rendererBack = new Renderer(this.renderListBack, this.canvasBack.getContext('2d'));
+		this.rendererBack.backgroundColor = this.getAttribute('bg-color') || DEFAULT_BG_COLOR;
+		this.rendererBack.observe(this.handleRender.bind(this));
+
+		this.canvasFront.addEventListener('click', this.handleClick.bind(this));
+
+		if (this.hasAttribute('bg-image')) {
+			this.bgImageLoader = this.rendererBack.setBackgroundImage(this.getAttribute('bg-image') || '');
+		}
+	}
+
+	protected handleRender(): void {
+		this.dispatchEvent(
+			new CustomEvent(
+				'render',
+				{bubbles: false, cancelable: false, composed: true}
+			)
+		);
+	}
+
 	protected handleAttributesChange(): void {
 		this.updateCanvasSize();
 	}
 
 	protected handleBgColorChange(): void {
-		this.rendererBack.backgroundColor = this.getAttribute('bg-color') || DEFAULT_BG_COLOR;
+		if (this.rendererBack) {
+			this.rendererBack.backgroundColor = this.getAttribute('bg-color') || DEFAULT_BG_COLOR;
+		}
 	}
 
 	protected handleBgImageChange(): void {
-		this.bgImageLoader = this.rendererBack.setBackgroundImage(this.getAttribute('bg-image') || '');
-		console.log('handleBgImageChange');
+		if (this.rendererBack) {
+			this.bgImageLoader = this.rendererBack.setBackgroundImage(this.getAttribute('bg-image') || '');
+		}
 	}
 
-	private async preloadSounds(): Promise<void> {
+	private preloadSounds(): void {
 		if (this.hasAttribute('sounds-url')) {
 			SoundEffect.assetsUrl = this.getAttribute('sounds-url');
 		}
 
-		const list: Promise<boolean>[] = [];
 		for (const fileName of Object.values(SoundEffectsList)) {
-			list.push(new SoundEffect(fileName).preloadFile());
+			new SoundEffect(fileName).preloadFile()
 		}
-
-		await Promise.all(list);
 	}
 
 	private updateCanvasSize = (): void => {
+		if (!this.canvasFront) {
+			return;
+		}
+
 		if (this.hasAttribute('fullscreen')) {
 			this.canvasFront.width = window.innerWidth || document.documentElement.clientWidth;
 			this.canvasFront.height = window.innerHeight || document.documentElement.clientHeight;
@@ -135,8 +223,28 @@ export class FireworksCanvas extends AbstractCustomElement {
 		const y: number = e.clientY - top;
 		const elem: RenderElementInterface | null = this.renderListBack.getElementUnderPoint({x, y});
 
-		if (elem instanceof AbstractRocket) {
-			elem.launch();
+		if (!(elem instanceof AbstractRocket) || !this.elements.has(elem)) {
+			return;
 		}
+
+		const firework: FireworkType = this.elements.get(elem);
+
+		if (!firework.canBeLaunched) {
+			return;
+		}
+
+		this.dispatchEvent(new CustomEvent('launch', {
+			composed: true,
+			bubbles: false,
+			cancelable: false,
+			detail: firework
+		}))
+
+		this.renderListFront.add(elem, 0, firework.onBeforeRender || null, firework.onAfterRender || null);
+		this.rendererFront.requestRender((): void => {
+			this.rendererBack.requestRender();
+			this.renderListBack.remove(elem);
+			elem.launch();
+		});
 	}
 }
