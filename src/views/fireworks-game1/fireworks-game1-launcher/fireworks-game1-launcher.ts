@@ -5,13 +5,14 @@ import {FireworksGame1} from "../fireworks-game1";
 import {Game1} from "../../../models/game1/Game1";
 
 const FORCE_GAME: boolean = window.location.hash === '#game';
-const START_DELAY: number = FORCE_GAME ? 100 : 15000; // ms
-const DECISION_DELAY: number = 30000;
+const START_DELAY: number = FORCE_GAME ? 100 : 20000; // ms
+const DECISION_DELAY: number = 20000;
 
 export class FireworksGame1Launcher extends AbstractCustomElement {
 	private timer: number = 0;
 	private decisionTimer: number = 0;
 	private shown: boolean = false;
+	private totallyHide: boolean = false;
 	private game: FireworksGame1 = null;
 
 	constructor() {
@@ -27,7 +28,7 @@ export class FireworksGame1Launcher extends AbstractCustomElement {
 			return;
 		}
 
-		if (Math.random() <= 0.3 && !FORCE_GAME) {
+		if (Math.random() <= 0.5 && !FORCE_GAME) {
 			return;
 		}
 
@@ -68,7 +69,7 @@ export class FireworksGame1Launcher extends AbstractCustomElement {
 			return;
 		}
 
-		if (this.game !== null || this.shown) {
+		if (this.game !== null || this.shown || this.totallyHide) {
 			return;
 		}
 
@@ -87,9 +88,11 @@ export class FireworksGame1Launcher extends AbstractCustomElement {
 	}
 
 	private hide = (): void => {
+		window.clearTimeout(this.timer);
 		window.clearTimeout(this.decisionTimer);
 		this.removeAttribute('show');
 		this.shown = false;
+		this.totallyHide = true;
 	}
 
 	private run(): void {
